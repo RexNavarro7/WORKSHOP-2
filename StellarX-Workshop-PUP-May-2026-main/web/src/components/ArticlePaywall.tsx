@@ -50,30 +50,42 @@ export default function ArticlePaywall({ article, publicKey, onUnlock }: Props) 
     setBusy(true);
     setError('');
     try {
-      const xdr = await buildPayForArticleXDR(
-        publicKey,
-        article.id,
-        article.authorAddress,
-        ARTICLE_PRICE_STROOPS,
-      );
-
       const freighter = await import('@stellar/freighter-api');
-      const signed = await freighter.signTransaction(xdr, {
-        networkPassphrase: NETWORK_PASSPHRASE,
-        address: publicKey,
-      });
-      if (signed.error) {
-        throw new Error(
-          typeof signed.error === 'string' ? signed.error : 'Signing was rejected',
+
+      // Build a fresh XDR immediately before signing so timebounds stay valid.
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const xdr = await buildPayForArticleXDR(
+          publicKey,
+          article.id,
+          article.authorAddress,
+          ARTICLE_PRICE_STROOPS,
         );
+
+        const signed = await freighter.signTransaction(xdr, {
+          networkPassphrase: NETWORK_PASSPHRASE,
+          address: publicKey,
+        });
+        if (signed.error) {
+          throw new Error(
+            typeof signed.error === 'string' ? signed.error : 'Signing was rejected',
+          );
+        }
+
+        try {
+          const hash = await submitSignedXDR(signed.signedTxXdr);
+          await pollTransaction(hash);
+          setTxHash(hash);
+          setUnlocked(true);
+          onUnlock?.(article.id, hash);
+          return;
+        } catch (submitErr: unknown) {
+          const msg = submitErr instanceof Error ? submitErr.message : '';
+          if (attempt === 0 && msg.includes('expired')) {
+            continue;
+          }
+          throw submitErr;
+        }
       }
-
-      const hash = await submitSignedXDR(signed.signedTxXdr);
-      await pollTransaction(hash);
-
-      setTxHash(hash);
-      setUnlocked(true);
-      onUnlock?.(article.id, hash);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Transaction failed');
     } finally {
@@ -81,7 +93,7 @@ export default function ArticlePaywall({ article, publicKey, onUnlock }: Props) 
     }
   };
 
-  const priceLabel = `$${(ARTICLE_PRICE_STROOPS / 1_000_000).toFixed(2)} USDC`;
+  const priceLabel = `$${(ARTICLE_PRICE_STROOPS / 10_000_000).toFixed(2)} USDC`;
 
   return (
     <article className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">

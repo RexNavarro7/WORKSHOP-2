@@ -23,7 +23,7 @@ echo "Building contracts..."
 stellar contract build
 
 echo "Resolving testnet USDC contract ID..."
-USDC_CONTRACT_ID=$(stellar contract id --asset "USDC:${USDC_ISSUER}" --network "$NETWORK")
+USDC_CONTRACT_ID=$(stellar contract id asset --asset "USDC:${USDC_ISSUER}" --network "$NETWORK")
 echo "USDC SAC: $USDC_CONTRACT_ID"
 
 echo "Deploying journalism-paywall to $NETWORK..."
@@ -40,6 +40,12 @@ stellar contract invoke \
   --network "$NETWORK" \
   -- init --token "$USDC_CONTRACT_ID" || echo "(init skipped — contract may already be initialised)"
 
+echo "Adding USDC trustline for journalist account ($IDENTITY)..."
+stellar tx new change-trust \
+  --source-account "$IDENTITY" \
+  --line "USDC:${USDC_ISSUER}" \
+  --network "$NETWORK" || echo "(USDC trustline may already exist)"
+
 set_env_line() {
   local key="$1" val="$2"
   if [ -f "$ENV_FILE" ]; then
@@ -51,6 +57,7 @@ set_env_line() {
 
 set_env_line "NEXT_PUBLIC_JOURNALISM_CONTRACT_ID" "$CONTRACT_ID"
 set_env_line "NEXT_PUBLIC_USDC_CONTRACT_ID" "$USDC_CONTRACT_ID"
+set_env_line "NEXT_PUBLIC_USDC_ISSUER" "$USDC_ISSUER"
 
 echo ""
 echo "Wrote NEXT_PUBLIC_JOURNALISM_CONTRACT_ID=$CONTRACT_ID"

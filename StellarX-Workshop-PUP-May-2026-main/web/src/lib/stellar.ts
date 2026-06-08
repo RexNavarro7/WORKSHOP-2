@@ -16,6 +16,9 @@ export const JOURNALISM_CONTRACT_ID =
 export const USDC_CONTRACT_ID =
   process.env.NEXT_PUBLIC_USDC_CONTRACT_ID ?? '';
 
+/** Seconds before a built tx expires — allow time for Freighter approval */
+export const TX_TIMEOUT_SECONDS = 300;
+
 // v15 SDK: use the `rpc` namespace (the old `SorobanRpc` namespace is gone).
 export const server = new rpc.Server(RPC_URL);
 

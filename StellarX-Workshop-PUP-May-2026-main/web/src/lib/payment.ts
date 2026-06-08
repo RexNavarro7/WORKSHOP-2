@@ -32,12 +32,27 @@ export async function buildPaymentXDR(
   return tx.toXDR();
 }
 
+/** Turn ledger submit errors into actionable messages. */
+export function parseSubmitError(raw: string): string {
+  if (raw.includes('txTooLate')) {
+    return (
+      'Transaction expired before it reached the network. ' +
+      'Click Unlock again and approve promptly in Freighter.'
+    );
+  }
+  if (raw.includes('tx_bad_seq')) {
+    return 'Account sequence changed. Click Unlock again to rebuild the transaction.';
+  }
+  return raw;
+}
+
 /** Submit a Freighter-signed XDR. Returns the transaction hash. */
 export async function submitSignedXDR(signedXdr: string): Promise<string> {
   const tx = TransactionBuilder.fromXDR(signedXdr, NETWORK_PASSPHRASE);
   const res = await server.sendTransaction(tx);
   if (res.status === 'ERROR') {
-    throw new Error(`Submit rejected: ${JSON.stringify(res.errorResult ?? res)}`);
+    const raw = JSON.stringify(res.errorResult ?? res);
+    throw new Error(parseSubmitError(raw));
   }
   return res.hash;
 }

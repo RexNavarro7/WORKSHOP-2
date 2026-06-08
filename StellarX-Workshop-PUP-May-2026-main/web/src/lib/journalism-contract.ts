@@ -13,12 +13,37 @@ import {
   NETWORK_PASSPHRASE,
   JOURNALISM_CONTRACT_ID,
   USDC_CONTRACT_ID,
+  TX_TIMEOUT_SECONDS,
 } from './stellar';
 
 const READ_SOURCE = 'GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5';
 
 /** $0.02 USDC — 7 decimal places → 200,000 stroops */
 export const ARTICLE_PRICE_STROOPS = 200_000;
+
+/** Turn raw Soroban simulation errors into actionable messages. */
+export function parsePaywallSimulationError(raw: string): string {
+  if (raw.includes('trustline entry is missing')) {
+    return (
+      'The journalist wallet cannot receive USDC yet (no trustline on the recipient account). ' +
+      'An admin must run: .\\scripts\\setup-journalist.ps1'
+    );
+  }
+  if (
+    raw.includes('insufficient balance') ||
+    raw.includes('InsufficientBalance') ||
+    raw.includes('balance is too low')
+  ) {
+    return (
+      'Your wallet does not have enough USDC. Add a USDC trustline on this page, ' +
+      'then get testnet USDC from https://faucet.circle.com/'
+    );
+  }
+  if (raw.includes('trustline') && raw.includes('missing')) {
+    return 'A USDC trustline is missing. Click "Add USDC trustline" above, then try again.';
+  }
+  return raw;
+}
 
 export function journalismContractConfigured(): boolean {
   return Boolean(JOURNALISM_CONTRACT_ID);
@@ -43,7 +68,7 @@ export async function readIsUnlocked(
         nativeToScVal(articleId, { type: 'symbol' }),
       ),
     )
-    .setTimeout(30)
+    .setTimeout(TX_TIMEOUT_SECONDS)
     .build();
 
   const sim = await server.simulateTransaction(tx);
@@ -80,14 +105,14 @@ export async function buildPayForArticleXDR(
         nativeToScVal(BigInt(amountStroops), { type: 'i128' }),
       ),
     )
-    .setTimeout(30)
+    .setTimeout(TX_TIMEOUT_SECONDS)
     .build();
 
   const sim = await server.simulateTransaction(tx);
   if (!rpc.Api.isSimulationSuccess(sim)) {
     const detail =
       'error' in sim && sim.error ? String(sim.error) : 'simulation failed';
-    throw new Error(`Simulation failed — pay_for_article would not succeed: ${detail}`);
+    throw new Error(parsePaywallSimulationError(detail));
   }
 
   return rpc.assembleTransaction(tx, sim).build().toXDR();

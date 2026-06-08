@@ -19,7 +19,7 @@ export const ARTICLES: Article[] = [
     summary:
       'A three-month investigation into why three barangays along the Pasig River flood every monsoon — and where the maintenance budget goes.',
     author: 'Mara Santos',
-    authorAddress: 'GCKFBEIYTKPGA4SMI5L7TIZPV2I7N2T6BVOM2UKQZDHIM5GI5HGOPRA',
+    authorAddress: 'GAR6VAWBMYWGNLQ72JWCMPIU3PAMI4QI56VVLKZW7SGX4OH2XUQ2HELN',
     neighborhood: 'Santa Mesa, Manila',
     publishedAt: '2026-06-01',
     body: `Every June, residents of Block 14 watch the alley turn into a canal. This year we traced ₱2.4M in barangay disaster funds through three contractors — only one of whom filed a valid business permit.
@@ -36,7 +36,7 @@ The barangay captain declined three interview requests. The city engineer's offi
     summary:
       'How one cooperative fought consolidation — and what their survival means for 400 daily commuters.',
     author: 'Rico Delgado',
-    authorAddress: 'GCKFBEIYTKPGA4SMI5L7TIZPV2I7N2T6BVOM2UKQZDHIM5GI5HGOPRA',
+    authorAddress: 'GAR6VAWBMYWGNLQ72JWCMPIU3PAMI4QI56VVLKZW7SGX4OH2XUQ2HELN',
     neighborhood: 'Recto, Manila',
     publishedAt: '2026-05-28',
     body: `Route 816 was supposed to disappear in January. Instead, 12 drivers pooled savings, refinanced one jeepney, and kept running — illegally, according to LTFRB records, but daily for the nurses and students who depend on it.
@@ -53,7 +53,7 @@ This report includes the full LTFRB case file number and the cooperative's propo
     summary:
       'Vendors say fees doubled overnight. Stall assignment records tell a different story than the market administrator\'s press release.',
     author: 'Ana Villanueva',
-    authorAddress: 'GCKFBEIYTKPGA4SMI5L7TIZPV2I7N2T6BVOM2UKQZDHIM5GI5HGOPRA',
+    authorAddress: 'GAR6VAWBMYWGNLQ72JWCMPIU3PAMI4QI56VVLKZW7SGX4OH2XUQ2HELN',
     neighborhood: 'Quiapo, Manila',
     publishedAt: '2026-05-25',
     body: `Forty-seven vendors signed a complaint letter in April. By May, twelve had withdrawn their names. We interviewed both groups.
